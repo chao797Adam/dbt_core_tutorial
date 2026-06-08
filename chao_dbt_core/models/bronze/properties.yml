@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: bronze_sales
+    description: "销售数据的 Bronze 层，保留原始字段并增加审计字段"
+    columns:
+      - name: sales_id
+        description: "主键 ID"
+        data_tests: # dbt 1.8+ 建议使用 data_tests 替代 tests
+          - unique
+          - not_null
+
+      - name: gross_amount
+        description: "总金额"
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between: # 如果你用了扩展包
+              min_value: 0
+              max_value: 100000
+          # 或者使用你自定义的测试 (注意缩进)
+          - test_range:
+              min_val: 0
+              max_val: 100000
+
+  - name: bronze_store
+    columns:                   
+      - name: store_sk         
+        data_tests:            
+          - unique
+          - not_null
+      - name: store_name
+        data_tests:           
+          - not_null
+          - accepted_values:
+              arguments:      
+                values: ['MegaMart Manhattan', 'MegaMart Austin', 'MegaMart San Jose', 'MegaMart Toronto', 'MegaMart Brooklyn', 'xc']
+                severity: warn
+      - name: country
+        data_tests:            
+          - accepted_values:
+              values: ['USA', 'Canada'] # 直接写 values
+              severity: warn            # 直接写 severity

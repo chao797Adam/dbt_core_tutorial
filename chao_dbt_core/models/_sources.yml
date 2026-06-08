@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: source
+    database: '{{target.catalog}}'
+    schema: source 
+    tables:
+      - name: fact_sales
+        description: "销售事实表"
+      - name: fact_returns
+        description: "退货事实表"
+      - name: dim_date
+        description: "日期维度表"
+      - name: dim_customer
+        description: "客户维度表"
+      - name: dim_product
+        description: "产品维度表"
+      - name: dim_store
+      - name: item
+      - name: lookup 
