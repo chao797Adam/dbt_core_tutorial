@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: source
-    database: '{{target.catalog}}'
+    database: dbt_core_case
     schema: source 
     tables:
       - name: fact_sales
@@ -18,4 +18,4 @@ sources:
       - name: dim_store
         description: "store dimension table"
       - name: item 
-      - name: lookup 
+      - name: lookup
