@@ -13,7 +13,7 @@ models:
       - name: gross_amount
         description: "total amount"
         data_tests:
-          - generic_non_negative
+          - generic_non_neg
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
                 min_value: 0
