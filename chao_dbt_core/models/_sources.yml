@@ -17,5 +17,5 @@ sources:
         description: "product dimension table"
       - name: dim_store
         description: "store dimension table"
-      - name: item
+      - name: item 
       - name: lookup 

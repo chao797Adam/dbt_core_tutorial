@@ -31,4 +31,4 @@ select
     round(sum(calculated_gross_amount), 2) as total_calculated_gross_amount
 from joined_query
 group by category, gender
-order by total_gross_amount desc
+order by 1, total_gross_amount desc
