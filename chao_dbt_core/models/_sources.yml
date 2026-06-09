@@ -6,15 +6,16 @@ sources:
     schema: source 
     tables:
       - name: fact_sales
-        description: "销售事实表"
+        description: "sales fact table"
       - name: fact_returns
-        description: "退货事实表"
+        description: "returns fact table"
       - name: dim_date
-        description: "日期维度表"
+        description: "date dimension table"
       - name: dim_customer
-        description: "客户维度表"
+        description: "customer dimension table"
       - name: dim_product
-        description: "产品维度表"
+        description: "product dimension table"
       - name: dim_store
+        description: "store dimension table"
       - name: item
       - name: lookup 

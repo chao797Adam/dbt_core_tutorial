@@ -1,8 +1,4 @@
--- 检查store表中是否有非法的国家代码
-SELECT 
-    store_sk,
-    store_name,
-    country
-FROM {{ ref('bronze_store') }}
-WHERE country NOT IN ('USA', 'Canada')
-  AND country IS NOT NULL
+-- find stores with invalid country values
+select store_sk, store_name, country
+from {{ ref('bronze_store') }}
+where country not in ('USA', 'Canada') and country is not null

@@ -1,7 +1,5 @@
--- 找出重复的store_name
-SELECT 
-    store_name,
-    COUNT(*) as duplicate_count
-FROM {{ ref('bronze_store') }}
-GROUP BY store_name
-HAVING COUNT(*) > 1
+-- find duplicate store names
+select store_name, count(*) as duplicate_count
+from {{ ref('bronze_store') }}
+group by store_name
+having count(*) > 1

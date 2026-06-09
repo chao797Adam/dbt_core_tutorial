@@ -1,7 +1,6 @@
--- 检查支付方式是否在允许的范围内
-SELECT 
-    sales_id,
-    payment_method
-FROM {{ ref('bronze_sales') }}
-WHERE payment_method NOT IN ('Digital Wallet', 'Cash', 'Card', 'Gift Card')
-   OR payment_method IS NULL
+-- find invalid payment methods
+select sales_id, payment_method
+from {{ ref('bronze_sales') }}
+where
+    payment_method not in ('Digital Wallet', 'Cash', 'Card', 'Gift Card')
+    or payment_method is null

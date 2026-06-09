@@ -36,6 +36,6 @@ models:
         data_tests:            
           - accepted_values:
               arguments:
-                values: ['USA', 'Canada']
+                values: ['USA', 'Canada', 'Mexico']
               config:         
                 severity: warn
