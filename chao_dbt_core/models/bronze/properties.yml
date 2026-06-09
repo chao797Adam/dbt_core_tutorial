@@ -33,7 +33,8 @@ models:
               config:         
                 severity: warn
       - name: country
-        data_tests:            
+        data_tests:
+          - not_null            
           - accepted_values:
               arguments:
                 values: ['USA', 'Canada', 'Mexico']
