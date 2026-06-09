@@ -15,9 +15,9 @@ with
     joined_query as (
         select
             s.sales_id,
+            s.payment_method,
             s.gross_amount,
             s.calculated_gross_amount,
-            s.payment_method,
             p.category,
             c.gender
         from sales s
