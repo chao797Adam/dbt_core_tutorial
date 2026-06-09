@@ -10,3 +10,5 @@ wheels/
 .venv/
 profiles.yml
 .vscode/
+logs/dbt.log
+.user.yml
