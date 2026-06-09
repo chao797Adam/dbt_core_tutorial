@@ -1,6 +1,7 @@
 {{
   config(
-    materialized = 'view',
+    materialized = 'table',
     )
 }}
-select * from {{ source('source', 'fact_sales') }}
+select *
+from {{ source('source', 'fact_sales') }}
