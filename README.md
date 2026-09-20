@@ -45,12 +45,11 @@ Source (dbt_core_Tutorial.source)
 
 | Tool | Version |
 |------|---------|
-| dbt Core | 1.11.8 |
-| dbt-databricks | 1.12.0 |
+| dbt core | 1.12.5 |
 | Databricks / Delta Lake | - |
 | Python | 3.12 |
 | dbt-expectations | (package) |
-| dbt-date | (package) |
+
 
 ---
 
@@ -479,9 +478,9 @@ order by dbt_valid_from;
 ## Setup
 
 ### Prerequisites
-- Python 3.12+
+- Python 3.12
 - Databricks workspace with SQL Warehouse
-- Access to `dbt_core_case` catalog
+- Access to `dbt_core_tutorial` catalog
 
 ### Installation
 
