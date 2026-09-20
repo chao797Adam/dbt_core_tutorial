@@ -228,8 +228,60 @@ models:
     dbt test --select bronze_sales
     ```
 
-
 ---
+
+## Jinja Basics & Dynamic SQL (Analyses)
+
+* **Basic Variable Assignment (`analyses/jinja1.sql`)**
+  * **Code**:
+    ```jinja
+    {% set my_var = 'xc' %}
+    SELECT '{{ my_var }}' AS val
+    ```
+  * **Note**: Must be wrapped in a valid SQL select statement for compilation.
+
+* **List Iteration (`analyses/jinja2.sql`)**
+  * **Code**:
+    ```jinja
+    {% set apples = ["Gala", "Red Delicious", "Fuji", "McIntosh", "Honeycrisp"] %}
+
+    {% for i in apples %}
+        {{ i }}
+    {% endfor %}
+    ```
+
+* **Conditional Loop (`analyses/jinja2.sql` variant)**
+  * **Code**:
+    ```jinja
+    {%- set apples = ["Gala", "Red Delicious", "Fuji", "McIntosh", "Honeycrisp"] -%}
+
+    {% for i in apples %}
+        {% if i != "McIntosh" %}
+            {{ i }}
+        {% else %}
+            I hate {{ i }}
+        {% endif %}
+    {% endfor %}
+    ```
+
+* **Dynamic Columns & Incremental Filtering (`analyses/jinja3.sql`)**
+  * **Code**:
+    ```sql
+    {% set inc_flag = 1 %}
+    {% set last_load = 3 %}
+    {% set cols_list = ["sales_id", "date_sk", "order_amount"] %}
+
+    SELECT
+        {% for i in cols_list %}
+            {{ i }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    FROM
+        {{ ref('bronze_sales') }}
+
+    {% if inc_flag == 1 %}
+        WHERE date_sk > {{ last_load }}
+    {% endif %}
+    ```
 
 ## Snapshot — SCD Type 2
 
