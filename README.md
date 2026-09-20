@@ -106,10 +106,9 @@ dbt_core_proj/
 
 ## Data Tests
 
-## Data Tests Inventory
+### 1. Data Tests Inventory
 
-### 1. Generic Tests (`models/.../properties.yml`)
-
+#### Generic Tests (`models/.../properties.yml`)
 | Model | Column | Tests Configured | Severity / Notes |
 | :--- | :--- | :--- | :--- |
 | `bronze_sales` | `sales_id` | `unique`, `not_null` | Error (default) |
@@ -118,11 +117,8 @@ dbt_core_proj/
 | `bronze_store` | `store_name` | `not_null`, `accepted_values` (`['MegaMart Manhattan', 'MegaMart Austin', 'MegaMart San Jose', 'MegaMart Toronto', 'MegaMart Brooklyn', 'xc']`) | `severity: warn` |
 | `bronze_store` | `country` | `not_null`, `accepted_values` (`['USA', 'Canada', 'Mexico']`) | `severity: warn` |
 
----
-
-### 2. Custom Singular Tests (`tests/`)
+#### Custom Singular Tests (`tests/`)
 *(Singular tests placed under `tests/` for cross-column business rule or dataset-level validation)*
-
 | Test Name | SQL Logic / Purpose |
 | :--- | :--- |
 | `assert_refund_less_than_sales` | Refund amount must not exceed sales |
@@ -130,6 +126,44 @@ dbt_core_proj/
 | `duplicate_store_names` | No duplicate store names |
 | `payment_method_check` | Valid payment methods only |
 | `quantity_price_check` | Quantity × price = gross amount |
+
+---
+
+### 2. Execution Guide: Running Generic Tests Only
+
+* **Option A: Single Model Example (`bronze_sales`)**
+  * **YAML Definition (`properties.yml`)**:
+    ```yaml
+    models:
+      - name: bronze_sales
+        description: "sales for bronze layer"
+        columns:
+          - name: sales_id
+            description: "primary ID"
+            data_tests: 
+              - unique
+              - not_null
+
+          - name: gross_amount
+            description: "total amount"
+            data_tests:
+              - generic_non_neg
+              - dbt_expectations.expect_column_values_to_be_between:
+                  arguments:
+                    min_value: 0
+                    max_value: 100000
+    ```
+  * **CLI Command**:
+    ```bash
+    dbt test --select bronze_sales
+    ```
+  * **Behavior**: Executes strictly the column-level generic tests tied to `bronze_sales`, ignoring other models and standalone singular tests.
+
+* **Option B: Global Generic-Only (Exclude Singular Tests)**
+  * **CLI Command**:
+    ```bash
+    dbt test --exclude path:tests
+    ```
 
 ---
 
