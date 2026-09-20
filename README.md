@@ -83,6 +83,12 @@ dbt_core_proj/
 
 ---
 
+### Config Precedence (High to Low)
+
+1. **Model `.sql` file**: `{{ config(...) }}` — **Highest**
+2. **Properties `.yml` file**: `config:` block (e.g., `models/bronze/properties.yml`)
+3. **Project config**: `dbt_project.yml` under `+config` — **Lowest**
+
 ## Data Tests
 
 ### Generic Tests (properties.yml)
