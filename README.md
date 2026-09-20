@@ -174,7 +174,8 @@ models:
               values: ['USA', 'Canada', 'Mexico']
             config:         
               severity: warn
-    ```
+```
+
 * **Option A: Single Model Generic Tests Only (`bronze_sales`, 4 test results)**
   * **CLI Command**:
     ```bash
