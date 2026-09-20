@@ -284,6 +284,23 @@ models:
     {% endif %}
     ```
 ---
+## 💡 Architecture Notes & Trade-offs (Silver Layer Scope)
+
+> **Tutorial Reality vs. Enterprise Best Practice**:
+> * **Tutorial Scope**: In this tutorial/video, the Silver layer joins the fact table directly with 5 core entities (`sales` + `product` + `customer` + `store` + `date`).
+> * **Production Standard**: Production-grade standards dictate that the Silver layer should remain **atomic**, handling data cleansing and foreign key preservation (`*_sk`), while pushing multi-table denormalized wide-table assembly down to the **Gold (Mart)** layer.
+
+### Architectural Comparison
+
+| Dimension / Layer | Tutorial Implementation | Production Best Practice |
+| :--- | :--- | :--- |
+| **Silver Layer** | Multi-entity enriched details (5-table JOIN) | Pure atomic entities & fact tables (retaining `*_sk`) |
+| **Gold Layer** | Lightweight aggregation or pass-through | Wide denormalized business mart (`gold_sales_wide`) + agg tables (`_agg`) |
+| **Trade-off** | Intuitive and fast for rapid tutorial setup | High dimension reusability; prevents metric drift & implicit row inflation |
+
+> 📌 **Note**: Using a 5-table Silver join for hands-on practice is completely fine. Evolving your architecture toward `Silver (atomic) -> Gold (wide/agg)` later is a great way to showcase architectural maturity.
+
+---
 
 ## Snapshot — SCD Type 2
 
