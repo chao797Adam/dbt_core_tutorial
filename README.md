@@ -524,6 +524,133 @@ dbt_core_proj:
       token: <your-token>
   target: dev
 ```
+Dev and prod are separated by **catalog**, since `generate_schema_name` is overridden to use the exact schema names (`bronze`, `silver`, `gold`).
+
+Run against a specific environment:
+
+```bash
+dbt run                  # uses dev (default target)
+dbt run --target prod    # uses prod
+```
+
+### Prepare Prod Source Data
+
+The prod catalog (`dbt_core_tutorial_prod`) must exist and contain the source tables before running with `--target prod`. Copy the 7 source tables from dev using one of the two methods below.
+
+```sql
+CREATE SCHEMA IF NOT EXISTS dbt_core_tutorial_prod.source;
+```
+
+#### Option A: CTAS (CREATE TABLE AS SELECT)
+
+```sql
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.dim_customer AS
+SELECT * FROM dbt_core_tutorial.source.dim_customer;
+
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.dim_date AS
+SELECT * FROM dbt_core_tutorial.source.dim_date;
+
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.dim_product AS
+SELECT * FROM dbt_core_tutorial.source.dim_product;
+
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.dim_store AS
+SELECT * FROM dbt_core_tutorial.source.dim_store;
+
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.fact_returns AS
+SELECT * FROM dbt_core_tutorial.source.fact_returns;
+
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.fact_sales AS
+SELECT * FROM dbt_core_tutorial.source.fact_sales;
+
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.items AS
+SELECT * FROM dbt_core_tutorial.source.items;
+```
+
+#### Option B: DEEP CLONE (loop over all tables)
+
+Requires Delta source tables and a SQL Warehouse that supports SQL scripting.
+
+```sql
+BEGIN
+  FOR t AS (
+    SELECT table_name
+    FROM dbt_core_tutorial.information_schema.tables
+    WHERE table_schema = 'source'
+      AND table_type <> 'VIEW'
+  ) DO
+    EXECUTE IMMEDIATE
+      'CREATE OR REPLACE TABLE dbt_core_tutorial_prod.source.`' || t.table_name || '`
+       DEEP CLONE dbt_core_tutorial.source.`' || t.table_name || '`';
+  END FOR;
+END;
+```
+
+| | CTAS | DEEP CLONE |
+|---|---|---|
+| Data and schema | Copied | Copied |
+| Column comments, table properties, constraints | Not preserved | Preserved |
+| Source format | Any queryable table | Delta only |
+| Best for | A few tables, simple copy | Many tables, full-fidelity copy |
+
+Verify the copy:
+
+```sql
+SHOW TABLES IN dbt_core_tutorial_prod.source;
+```
+
+### Environment-Aware Sources
+
+Make sure `_sources.yml` and `snap_items.yml` follows the active target instead of hard-coding the catalog:
+
+```yaml
+sources:
+  - name: source
+    database: "{{ target.catalog }}"
+    schema: source
+```
+
+With this, `dbt run` reads `dbt_core_tutorial.source`, and `dbt run --target prod` reads `dbt_core_tutorial_prod.source`.
+
+### Build Summary
+
+`dbt build --target prod` runs seeds, models, snapshots and tests in dependency order (26 nodes in total):
+
+| Type | Count | Content |
+|---|---|---|
+| Table model | 8 | `bronze_customer`, `bronze_date`, `bronze_product`, `bronze_returns`, `bronze_sales`, `bronze_store`, `silver_sales`, `gold_agg` |
+| View model | 1 | `item_dedup` |
+| Seed | 1 | `lookup` |
+| Snapshot | 1 | `snap_items` |
+| Data test | 15 | 10 generic + 5 singular (see below) |
+| **Total** | **26** | |
+
+**Generic tests (10)**
+
+- `bronze_store` (6): `unique`, `not_null` on `store_sk`; `not_null`, `accepted_values` on `store_name`; `not_null`, `accepted_values` on `country`
+- `bronze_sales` (4): `unique`, `not_null` on `sales_id`; `generic_non_neg`, `dbt_expectations.expect_column_values_to_be_between` on `gross_amount`
+
+**Singular tests (5)**
+
+- `duplicate_store_names`
+- `assert_refund_less_than_sales`
+- `negative_sales`
+- `payment_method_check`
+- `quantity_price_check`
+
+Tests act as gates: if a bronze test fails, downstream models (`silver_sales`, `gold_agg`) are skipped.
+
+### Snapshot History in Prod
+
+A snapshot stores its history only in the snapshot table itself; it cannot be rebuilt from the source. The prod source tables are copied from dev with CTAS (current state only), so the prod snapshot starts with a single version per record and history accumulates from the first prod run.
+
+To carry over history from dev, clone the snapshot table **before** the first prod snapshot run:
+
+```sql
+CREATE OR REPLACE TABLE dbt_core_tutorial_prod.snapshots.snap_items
+DEEP CLONE dbt_core_tutorial.snapshots.snap_items;
+```
+
+Never drop or full-refresh a snapshot table in prod, as the history cannot be recovered.
 
 ---
 

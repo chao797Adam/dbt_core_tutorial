@@ -1,1 +1,1 @@
-select * from {{ ref('bronze_sales') }}
+{{ target.catalog }}

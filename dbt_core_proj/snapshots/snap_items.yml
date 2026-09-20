@@ -3,6 +3,7 @@ snapshots:
     relation: ref('item_dedup')
     config:
       schema: snapshots
+      database: "{{ target.catalog }}"
       unique_key: id
       strategy: check
       check_cols: [name, category]
