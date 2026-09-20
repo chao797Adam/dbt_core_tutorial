@@ -435,6 +435,20 @@ dbt snapshot --select snap_items
 
 Snapshots are executed with `dbt snapshot`, not `dbt run`. Run it on a schedule; each execution captures the state of the source at that moment.
 
+`dbt snapshot` does not build upstream models, so whether `item_dedup` must be run first depends on how it is materialized:
+
+| `item_dedup` materialization | Command | Notes |
+|---|---|---|
+| `view` | `dbt snapshot --select snap_items` | The view reads the source in real time, so only one command is needed. Suitable for small to medium datasets. |
+| `table` | `dbt build --select +snap_items` | The table must be refreshed before each snapshot, otherwise new source changes are missed. `dbt build` runs `item_dedup` first, then `snap_items`. |
+
+Equivalent two-step form for the `table` case:
+
+```bash
+dbt run --select item_dedup
+dbt snapshot --select snap_items
+```
+
 ### Verification
 
 Current records only:
