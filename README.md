@@ -135,34 +135,55 @@ dbt_core_proj/
   * **YAML Definition (`properties.yml`)**:
     ```yaml
     models:
-      - name: bronze_sales
-        description: "sales for bronze layer"
-        columns:
-          - name: sales_id
-            description: "primary ID"
-            data_tests: 
-              - unique
-              - not_null
+  - name: bronze_sales
+    description: "sales for bronze layer"
+    columns:
+      - name: sales_id
+        description: "primary ID"
+        data_tests: 
+          - unique
+          - not_null
 
-          - name: gross_amount
-            description: "total amount"
-            data_tests:
-              - generic_non_neg
-              - dbt_expectations.expect_column_values_to_be_between:
-                  arguments:
-                    min_value: 0
-                    max_value: 100000
+      - name: gross_amount
+        description: "total amount"
+        data_tests:
+          - generic_non_neg
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100000
+
+  - name: bronze_store
+    columns:                    
+      - name: store_sk            
+        data_tests:            
+          - unique
+          - not_null
+      - name: store_name
+        data_tests:            
+          - not_null
+          - accepted_values:
+              values: ['MegaMart Manhattan', 'MegaMart Austin', 'MegaMart San Jose', 'MegaMart Toronto', 'MegaMart Brooklyn', 'xc']
+              config:         
+                severity: warn
+      - name: country
+        data_tests:
+          - not_null              
+          - accepted_values:
+              values: ['USA', 'Canada', 'Mexico']
+              config:         
+                severity: warn
     ```
+* **Option A: Single Model Generic Tests Only (`bronze_sales`, 4 test results)**
   * **CLI Command**:
     ```bash
-    dbt test --select bronze_sales
+    dbt test --select bronze_sales --exclude test_type:singular
     ```
-  * **Behavior**: Executes strictly the column-level generic tests tied to `bronze_sales`, ignoring other models and standalone singular tests.
+  * **Behavior**: Runs strictly the generic column-level tests for `bronze_sales` (4 tests), omitting related singular SQL tests.
 
-* **Option B: Global Generic-Only (Exclude Singular Tests)**
+* **Option B: Global Generic-Only (Exclude All Singular Tests, 10 test result)**
   * **CLI Command**:
     ```bash
-    dbt test --exclude path:tests
+    dbt test --exclude test_type:singular
     ```
 
 ---
