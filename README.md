@@ -189,6 +189,24 @@ models:
     dbt test --exclude test_type:singular
     ```
 
+### 3. Execution Guide
+* **Singular Test: Duplicate Store Names (`tests/assert_duplicate_store_names.sql`)**
+  * **CLI Command**:
+    ```bash
+    dbt test --select assert_duplicate_store_names
+    ```
+  * **SQL Query**:
+    ```sql
+    -- find duplicate store names
+    select store_name, count(*) as duplicate_count
+    from {{ ref('bronze_store') }}
+    group by store_name
+    having count(*) > 1
+    ```
+  * **Test Evaluation Logic**
+    * **0 rows**: **Pass** (no duplicate store names found)
+    * **> 0 rows**: **Fail** (each returned row represents a duplicate store name)
+
 ---
 
 ## Snapshot — SCD Type 2
