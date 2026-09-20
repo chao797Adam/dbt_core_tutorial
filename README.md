@@ -206,6 +206,28 @@ models:
   * **Test Evaluation Logic**
     * **0 rows**: **Pass** (no duplicate store names found)
     * **> 0 rows**: **Fail** (each returned row represents a duplicate store name)
+    
+* **Custom Generic Test: Non-Negative Check (`macros/generic_non_neg.sql` or `tests/generic/`)**
+  * **SQL Definition**:
+    ```sql
+    {% test generic_non_neg(model, column_name) %}
+        select * from {{ model }} where {{ column_name }} < 0
+    {% endtest %}
+    ```
+  * **YAML Configuration (`properties.yml`)**:
+    ```yaml
+    models:
+      - name: bronze_sales
+        columns:
+          - name: gross_amount
+            data_tests:
+              - generic_non_neg
+    ```
+  * **CLI Command**:
+    ```bash
+    dbt test --select bronze_sales
+    ```
+
 
 ---
 
