@@ -499,7 +499,7 @@ source .venv/bin/activate   # Mac/Linux
 pip install dbt-core dbt-databricks
 ```
 
-### Configure profiles.yml
+### Deployment: Configure profiles.yml
 
 Add to `~/.dbt/profiles.yml`:
 
