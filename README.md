@@ -62,16 +62,18 @@ dbt_core_proj/
 │   ├── _sources.yml          # Source definitions
 │   ├── bronze/               # Raw ingestion layer
 │   │   ├── bronze_*.sql
+│   │   ├── item_dedup.sql    # Deduplicated items (input for snapshot)
 │   │   └── properties.yml    # Tests & documentation
 │   ├── silver/               # Transformation layer
 │   │   └── silver_sales.sql
 │   └── gold/                 # Business metrics layer
 │       └── gold_sales_by_category.sql
 ├── snapshots/
-│   └── snap_items.sql        # SCD Type 2 snapshot
+│   └── snap_items.yml        # SCD Type 2 snapshot
 ├── tests/
 │   └── bronze/               # Custom singular tests
 ├── macros/
+│   ├── schema.sql            # Overrides generate_schema_name
 │   ├── multiply.sql          # Custom macro
 │   ├── generic_non_neg.sql   # Generic test macro
 │   └── ...
