@@ -89,6 +89,20 @@ dbt_core_proj/
 2. **Properties `.yml` file**: `config:` block (e.g., `models/bronze/properties.yml`)
 3. **Project config**: `dbt_project.yml` under `+config` — **Lowest**
 
+### Custom Schema Name Macro (`generate_schema_name`)
+
+> **Problem Solved**: Prevents dbt from prefixing custom schemas with `target.schema` (e.g., turning `silver` into `dev_silver`), ensuring clean schema isolation in Unity Catalog/Data Warehouse.
+
+#### Implementation (`macros/schema.sql`)
+```jinja
+{% macro generate_schema_name(custom_schema_name, node) -%}
+    {%- if custom_schema_name is none -%}
+        {{ target.schema }}
+    {%- else -%}
+        {{ custom_schema_name | trim }}
+    {%- endif -%}
+{%- endmacro %}
+
 ## Data Tests
 
 ### Generic Tests (properties.yml)
