@@ -264,9 +264,9 @@ models:
     {% endfor %}
     ```
 
-* **Dynamic Columns & Incremental Filtering (`analyses/jinja4.sql`)**
-  * **Pitfall Note**: Direct trailing commas like `{{ i }},` produce syntax errors (`order_amount, FROM ...`) [cite: 10]. Use `loop.last` check.
-  * **Code**:
+* **Dynamic Columns & Trailing Comma Fix (`analyses/jinja3.sql`)**
+  * **Pitfall Note**: Direct trailing commas like `{{ i }},` produce syntax errors (`order_amount, FROM ...`). Use `loop.last` check.
+  * **Fixed Code**:
     ```sql
     {% set inc_flag = 1 %}
     {% set last_load = 3 %}
@@ -283,25 +283,6 @@ models:
         WHERE date_sk > {{ last_load }}
     {% endif %}
     ```
-    
-* **Dynamic Columns & Incremental Filtering (`analyses/jinja5.sql`)**  
-* **Fixed Code**:
-    ```sql
-    {% set inc_flag = 1 %}
-    {% set last_load = 3 %}
-    {% set cols_list = ["sales_id", "date_sk", "order_amount"] %}
-
-    SELECT
-        {% for i in cols_list %}
-            {{ i }}{% if not loop.last %},{% endif %}
-        {% endfor %}
-    FROM
-        {{ ref('bronze_sales') }}
-
-    {% if inc_flag == 1 %}
-        WHERE date_sk > {{ last_load }}
-    {% endif %}
-    ```  
 ---
 
 ## Snapshot — SCD Type 2
