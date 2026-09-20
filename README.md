@@ -102,6 +102,7 @@ dbt_core_proj/
         {{ custom_schema_name | trim }}
     {%- endif -%}
 {%- endmacro %}
+```
 
 ## Data Tests
 
