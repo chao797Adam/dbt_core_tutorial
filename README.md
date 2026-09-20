@@ -689,4 +689,4 @@ dbt build --target prod
 
 Source data is shared from `dbt_core_tutorial.source` across both environments.
 
-*Reference: [Ansh Lamba — DBT The Ultimate Guide](https://www.youtube.com/watch?v=B8uwFmVt4sU&t=5009s)* [cite: 3]
+*Reference: [Ansh Lamba — DBT The Ultimate Guide](https://www.youtube.com/watch?v=B8uwFmVt4sU&t=5009s)* 
