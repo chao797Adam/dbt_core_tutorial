@@ -1,0 +1,9 @@
+snapshots:
+  - name: snap_items
+    relation: ref('item_dedup')
+    config:
+      schema: snapshots
+      unique_key: id
+      strategy: check
+      check_cols: [name, category]
+      dbt_valid_to_current: "to_date('9999-12-31', 'yyyy-MM-dd')"

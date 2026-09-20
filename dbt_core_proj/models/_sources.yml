@@ -11,5 +11,5 @@ sources:
       - name: dim_customer
       - name: dim_product
       - name: dim_store
-      - name: item 
+      - name: items 
       - name: lookup

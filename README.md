@@ -304,12 +304,159 @@ models:
 
 ## Snapshot — SCD Type 2
 
-`snap_items` tracks historical changes to the `item` table using the `check` strategy.
+### Purpose
 
-- **unique_key**: `id`
-- **strategy**: `check` (monitors `name` and `category`)
-- **deduplication**: `ROW_NUMBER()` ensures one row per `id` from source
-- **valid_to default**: `9999-12-31`
+Source tables such as `items` only store the **current state** of each record. When a row is updated, the previous value is overwritten and the history is lost.
+
+A dbt snapshot solves this by implementing a **Slowly Changing Dimension Type 2 (SCD2)** pattern: every time a tracked record changes, the old version is closed out and a new version is inserted. This makes it possible to:
+
+- Audit what a record looked like at any point in time
+- Run point-in-time analysis (e.g. "which category did item 1 belong to last month?")
+- Keep historical dimension values aligned with historical facts
+
+### Overview
+
+| Property | Value |
+|---|---|
+| Source | `source('source', 'items')` |
+| Dedup model | `item_dedup` |
+| Snapshot | `snap_items` |
+| Target schema | `snapshots` |
+| Strategy | `check` |
+| Unique key | `id` |
+| Tracked columns | `name`, `category` |
+| `dbt_valid_to` for current rows | `9999-12-31` |
+
+### How It Works
+
+dbt adds four metadata columns to the snapshot table:
+
+| Column | Meaning |
+|---|---|
+| `dbt_scd_id` | Unique identifier of each record version |
+| `dbt_updated_at` | Timestamp when dbt captured this version |
+| `dbt_valid_from` | Start of the period in which this version is valid |
+| `dbt_valid_to` | End of the validity period (`9999-12-31` = current version) |
+
+Example: `category` of item 1 changes from `category1` to `category1_new`.
+
+| id | name | category | dbt_valid_from | dbt_valid_to |
+|---|---|---|---|---|
+| 1 | item1 | category1 | 2026-09-01 10:00 | 2026-09-10 08:30 |
+| 1 | item1 | category1_new | 2026-09-10 08:30 | 9999-12-31 |
+
+### Implementation
+
+#### 1. Deduplicate the source
+
+A snapshot requires **exactly one row per `unique_key`** on every run. If the source can contain multiple rows for the same `id` (e.g. append-only updates), the snapshot fails or produces duplicate "current" records. `ROW_NUMBER()` keeps only the latest row per `id`.
+
+`models/bronze/item_dedup.sql`
+
+```sql
+select id, name, category, updateDate
+from (
+    select *,
+           row_number() over (partition by id order by updateDate desc) as rn
+    from {{ source('source', 'items') }}
+)
+where rn = 1
+```
+
+#### 2. Define the snapshot (YAML, dbt 1.9+)
+
+`snapshots/snap_items.yml`
+
+```yaml
+snapshots:
+  - name: snap_items
+    relation: ref('item_dedup')
+    config:
+      schema: snapshots
+      unique_key: id
+      strategy: check
+      check_cols: [name, category]
+      dbt_valid_to_current: "to_date('9999-12-31', 'yyyy-MM-dd')"
+```
+
+If the source has a reliable update timestamp, the `timestamp` strategy is more efficient because it avoids column-by-column comparison:
+
+```yaml
+      strategy: timestamp
+      updated_at: updateDate
+```
+
+Note: with `timestamp`, a change is only detected if `updateDate` also changes.
+
+#### 3. Legacy approach (SQL block)
+
+Before dbt 1.9, snapshots were defined as a `{% snapshot %}` block in a `.sql` file. This syntax is still supported.
+
+`snapshots/snap_items.sql`
+
+```sql
+{% snapshot snap_items %}
+    {{
+        config(
+          target_schema='snapshots',
+          unique_key='id',
+          strategy='check',
+          check_cols=['name', 'category'],
+          dbt_valid_to_current="to_date('9999-12-31', 'yyyy-MM-dd')"
+        )
+    }}
+
+    select id, name, category, updateDate
+    from (
+        select *, row_number() over (partition by id order by updateDate desc) as rn
+        from {{ source('source', 'items') }}
+    )
+    where rn = 1
+
+{% endsnapshot %}
+```
+
+| | YAML (current) | SQL `{% snapshot %}` (legacy) |
+|---|---|---|
+| Location | `snapshots/*.yml` | `snapshots/*.sql` |
+| Data input | `relation: source(...)` / `ref(...)` | Inline `select` statement |
+| Custom SQL inside snapshot | Not supported (use an upstream model) | Supported |
+| Config names | `database`, `schema` | `target_database`, `target_schema` |
+| Recommended for | New projects | Existing projects |
+
+The YAML approach separates configuration from transformation logic, which is why the deduplication lives in its own model (`item_dedup`).
+
+### Running
+
+```bash
+dbt run --select item_dedup
+dbt snapshot --select snap_items
+```
+
+Snapshots are executed with `dbt snapshot`, not `dbt run`. Run it on a schedule; each execution captures the state of the source at that moment.
+
+### Verification
+
+Current records only:
+
+```sql
+select * from snapshots.snap_items
+where dbt_valid_to = '9999-12-31';
+```
+
+Full history of one record:
+
+```sql
+select * from snapshots.snap_items
+where id = 1
+order by dbt_valid_from;
+```
+
+### Limitations
+
+- A snapshot only captures the state **at the time it runs**. If a record changes several times between two runs, intermediate versions are not recorded. Increase the run frequency if this matters.
+- The source (or the dedup model) must guarantee one row per `unique_key`.
+- Changing `unique_key` or `strategy` on an existing snapshot requires a manual migration or a rebuild of the snapshot table.
 
 ---
 
