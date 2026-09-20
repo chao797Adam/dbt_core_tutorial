@@ -2,20 +2,14 @@ version: 2
 
 sources:
   - name: source
-    database: dbt_core_case
+    database: dbt_core_tutorial
     schema: source 
     tables:
       - name: fact_sales
-        description: "sales fact table"
       - name: fact_returns
-        description: "returns fact table"
       - name: dim_date
-        description: "date dimension table"
       - name: dim_customer
-        description: "customer dimension table"
       - name: dim_product
-        description: "product dimension table"
       - name: dim_store
-        description: "store dimension table"
       - name: item 
       - name: lookup

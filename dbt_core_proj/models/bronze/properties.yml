@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: bronze_sales
+    description: "sales for bronze layer"
+    columns:
+      - name: sales_id
+        description: "primary ID"
+        data_tests: 
+          - unique
+          - not_null
+
+      - name: gross_amount
+        description: "total amount"
+        data_tests:
+          - generic_non_neg
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100000
+
+  - name: bronze_store
+    columns:                 
+      - name: store_sk         
+        data_tests:            
+          - unique
+          - not_null
+      - name: store_name
+        data_tests:            
+          - not_null
+          - accepted_values:
+              arguments:      
+                values: ['MegaMart Manhattan', 'MegaMart Austin', 'MegaMart San Jose', 'MegaMart Toronto', 'MegaMart Brooklyn', 'xc']
+              config:         
+                severity: warn
+      - name: country
+        data_tests:
+          - not_null            
+          - accepted_values:
+              arguments:
+                values: ['USA', 'Canada', 'Mexico']
+              config:         
+                severity: warn
