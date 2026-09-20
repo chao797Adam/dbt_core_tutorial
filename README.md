@@ -106,18 +106,30 @@ dbt_core_proj/
 
 ## Data Tests
 
-### Generic Tests (properties.yml)
-- `not_null` — sales_id, store_sk, country, store_name
-- `unique` — sales_id, store_sk
-- `accepted_values` — country (USA, Canada, Mexico), store_name, payment_method
-- `dbt_expectations.expect_column_values_to_be_between` — gross_amount
+## Data Tests Inventory
 
-### Custom Singular Tests
-- `assert_refund_less_than_sales` — refund amount must not exceed sales
-- `negative_sales` — no negative gross amount
-- `duplicate_store_names` — no duplicate store names
-- `payment_method_check` — valid payment methods only
-- `quantity_price_check` — quantity × price = gross amount
+### 1. Generic Tests (`models/.../properties.yml`)
+
+| Model | Column | Tests Configured | Severity / Notes |
+| :--- | :--- | :--- | :--- |
+| `bronze_sales` | `sales_id` | `unique`, `not_null` | Error (default) |
+| `bronze_sales` | `gross_amount` | `generic_non_neg`, `dbt_expectations.expect_column_values_to_be_between` (`0` to `100000`) | Error (default) |
+| `bronze_store` | `store_sk` | `unique`, `not_null` | Error (default) |
+| `bronze_store` | `store_name` | `not_null`, `accepted_values` (`['MegaMart Manhattan', 'MegaMart Austin', 'MegaMart San Jose', 'MegaMart Toronto', 'MegaMart Brooklyn', 'xc']`) | `severity: warn` |
+| `bronze_store` | `country` | `not_null`, `accepted_values` (`['USA', 'Canada', 'Mexico']`) | `severity: warn` |
+
+---
+
+### 2. Custom Singular Tests (`tests/`)
+*(Singular tests placed under `tests/` for cross-column business rule or dataset-level validation)*
+
+| Test Name | SQL Logic / Purpose |
+| :--- | :--- |
+| `assert_refund_less_than_sales` | Refund amount must not exceed sales |
+| `negative_sales` | No negative gross amount |
+| `duplicate_store_names` | No duplicate store names |
+| `payment_method_check` | Valid payment methods only |
+| `quantity_price_check` | Quantity × price = gross amount |
 
 ---
 

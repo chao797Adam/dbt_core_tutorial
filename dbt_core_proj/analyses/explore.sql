@@ -1,1 +1,1 @@
-select * from {{ source('source', 'dim_customer') }}
+select * from {{ ref('bronze_customer') }}
