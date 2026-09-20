@@ -114,6 +114,11 @@ source .venv/bin/activate   # Mac/Linux
 
 # Install dependencies
 pip install dbt-core dbt-databricks
+
+# Move into the dbt project and install dbt packages
+cd dbt_core_proj
+dbt deps
+
 ```
 
 ### Configure `profiles.yml`
@@ -131,7 +136,7 @@ dbt_core_proj:
       http_path: <your-http-path>
       schema: default
       threads: 3
-      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      token: <your-token>
     prod:
       type: databricks
       catalog: dbt_core_tutorial_prod
@@ -139,7 +144,7 @@ dbt_core_proj:
       http_path: <your-http-path>
       schema: default
       threads: 4
-      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      token: <your-token>
 ```
 
 >Never commit tokens to Git. `profiles.yml` lives outside the repository.
