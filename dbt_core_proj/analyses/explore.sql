@@ -1,1 +1,1 @@
-select * from {{ ref('bronze_customer') }}
+select * from {{ ref('bronze_store') }}
