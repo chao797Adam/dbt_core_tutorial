@@ -7,7 +7,7 @@ A production-ready dbt project built on **Databricks / Delta Lake**, implementin
 ## Architecture
 
 ```
-Source (dbt_core_case.source)
+Source (dbt_core_Tutorial.source)
         │
         ▼
 ┌─────────────┐
@@ -57,7 +57,7 @@ Source (dbt_core_case.source)
 ## Project Structure
 
 ```
-chao_dbt_core/
+dbt_core_proj/
 ├── models/
 │   ├── _sources.yml          # Source definitions
 │   ├── bronze/               # Raw ingestion layer
@@ -139,11 +139,11 @@ pip install dbt-core dbt-databricks
 Add to `~/.dbt/profiles.yml`:
 
 ```yaml
-chao_dbt_core:
+dbt_core_proj:
   outputs:
     dev:
       type: databricks
-      catalog: dbt_core_case
+      catalog: dbt_core_tutorial
       host: <your-databricks-host>
       http_path: <your-http-path>
       schema: default
@@ -151,7 +151,7 @@ chao_dbt_core:
       token: <your-token>
     prod:
       type: databricks
-      catalog: dbt_core_case_prod
+      catalog: dbt_core_tutorial_prod
       host: <your-databricks-host>
       http_path: <your-http-path>
       schema: default
@@ -192,7 +192,7 @@ dbt build --target prod
 
 | Environment | Catalog | Purpose |
 |-------------|---------|---------|
-| dev | `dbt_core_case` | Development & testing |
-| prod | `dbt_core_case_prod` | Production deployment |
+| dev | `dbt_core_tutorial` | Development & testing |
+| prod | `dbt_core_tutorial_prod` | Production deployment |
 
-Source data is shared from `dbt_core_case.source` across both environments.
+Source data is shared from `dbt_core_tutorial.source` across both environments.
