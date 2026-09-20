@@ -1,1 +1,1 @@
-select * from {{ ref('bronze_store') }}
+select * from {{ ref('lookup') }}
