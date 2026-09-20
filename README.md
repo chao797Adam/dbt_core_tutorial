@@ -189,7 +189,7 @@ models:
     dbt test --exclude test_type:singular
     ```
 
-### 3. Execution Guide
+### 3. Execution Guide: Running Singular Tests
 * **Singular Test: Duplicate Store Names (`tests/assert_duplicate_store_names.sql`)**
   * **CLI Command**:
     ```bash
