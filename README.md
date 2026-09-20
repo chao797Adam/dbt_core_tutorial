@@ -131,10 +131,12 @@ dbt_core_proj/
 
 ### 2. Execution Guide: Running Generic Tests Only
 
-* **Option A: Single Model Example (`bronze_sales`)**
+* **Single Model Example (`bronze_sales`)**
   * **YAML Definition (`properties.yml`)**:
-    ```yaml
-    models:
+```yaml
+version: 2
+
+models:
   - name: bronze_sales
     description: "sales for bronze layer"
     columns:
@@ -163,15 +165,15 @@ dbt_core_proj/
           - not_null
           - accepted_values:
               values: ['MegaMart Manhattan', 'MegaMart Austin', 'MegaMart San Jose', 'MegaMart Toronto', 'MegaMart Brooklyn', 'xc']
-              config:         
-                severity: warn
+            config:         
+              severity: warn
       - name: country
         data_tests:
           - not_null              
           - accepted_values:
               values: ['USA', 'Canada', 'Mexico']
-              config:         
-                severity: warn
+            config:         
+              severity: warn
     ```
 * **Option A: Single Model Generic Tests Only (`bronze_sales`, 4 test results)**
   * **CLI Command**:
@@ -180,7 +182,7 @@ dbt_core_proj/
     ```
   * **Behavior**: Runs strictly the generic column-level tests for `bronze_sales` (4 tests), omitting related singular SQL tests.
 
-* **Option B: Global Generic-Only (Exclude All Singular Tests, 10 test result)**
+* **Option B: Global Generic-Only (Exclude All Singular Tests, 10 test results)**
   * **CLI Command**:
     ```bash
     dbt test --exclude test_type:singular
