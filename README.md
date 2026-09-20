@@ -190,10 +190,10 @@ models:
     ```
 
 ### 3. Execution Guide: Running Singular Tests
-* **Singular Test: Duplicate Store Names (`tests/assert_duplicate_store_names.sql`)**
+* **Singular Test: Duplicate Store Names (`tests/duplicate_store_names.sql`)**
   * **CLI Command**:
     ```bash
-    dbt test --select assert_duplicate_store_names
+    dbt test --select duplicate_store_names
     ```
   * **SQL Query**:
     ```sql
